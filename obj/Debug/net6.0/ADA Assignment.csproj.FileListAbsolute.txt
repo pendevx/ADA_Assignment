@@ -1,0 +1,15 @@
+C:\Users\em18172\Downloads\ADA_Assignment\bin\Debug\net6.0\ADA Assignment.exe
+C:\Users\em18172\Downloads\ADA_Assignment\bin\Debug\net6.0\ADA Assignment.deps.json
+C:\Users\em18172\Downloads\ADA_Assignment\bin\Debug\net6.0\ADA Assignment.runtimeconfig.json
+C:\Users\em18172\Downloads\ADA_Assignment\bin\Debug\net6.0\ADA Assignment.dll
+C:\Users\em18172\Downloads\ADA_Assignment\bin\Debug\net6.0\ADA Assignment.pdb
+C:\Users\em18172\Downloads\ADA_Assignment\obj\Debug\net6.0\ADA Assignment.csproj.AssemblyReference.cache
+C:\Users\em18172\Downloads\ADA_Assignment\obj\Debug\net6.0\ADA Assignment.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\em18172\Downloads\ADA_Assignment\obj\Debug\net6.0\ADA Assignment.AssemblyInfoInputs.cache
+C:\Users\em18172\Downloads\ADA_Assignment\obj\Debug\net6.0\ADA Assignment.AssemblyInfo.cs
+C:\Users\em18172\Downloads\ADA_Assignment\obj\Debug\net6.0\ADA Assignment.csproj.CoreCompileInputs.cache
+C:\Users\em18172\Downloads\ADA_Assignment\obj\Debug\net6.0\ADA Assignment.dll
+C:\Users\em18172\Downloads\ADA_Assignment\obj\Debug\net6.0\refint\ADA Assignment.dll
+C:\Users\em18172\Downloads\ADA_Assignment\obj\Debug\net6.0\ADA Assignment.pdb
+C:\Users\em18172\Downloads\ADA_Assignment\obj\Debug\net6.0\ADA Assignment.genruntimeconfig.cache
+C:\Users\em18172\Downloads\ADA_Assignment\obj\Debug\net6.0\ref\ADA Assignment.dll

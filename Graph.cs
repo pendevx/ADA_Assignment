@@ -35,14 +35,16 @@ namespace ADA_Assignment
             int infinity = 2147400000;
             var n = Nodes.Count;
             var distances = new Dictionary<Node, double>();
-            var visited = new HashSet<Node>();
+            var visited = new List<Node>();
+            visited.Add(source);
 
             foreach (var node in Nodes) distances[node] = infinity;
             distances[source] = 0;
 
-            void PerformCycle(int i)
+            void PerformCycle()
             {
-                foreach (var node in Nodes)
+                var toAdd = new List<Node>();
+                foreach (var node in visited)
                 {
                     if (distances[node] == infinity) continue;
 
@@ -50,28 +52,22 @@ namespace ADA_Assignment
                     {
                         if (distances[e.To] == infinity)
                         {
-
+                            distances[e.To] = distances[node] + e.Weight;
                         }
-                        distances[e.To] = Math.Min(distances[e.To] == infinity ? e.Weight : distances[e.To], distances[e.To] + e.Weight);
+                        else
+                        {
+                            distances[e.To] = Math.Min(distances[e.To], distances[e.From] + e.Weight);
+                        }
+                        toAdd.Add(e.To);
                     }
                 }
 
-                foreach (var node in distances)
-                {
-                    Console.WriteLine($"{node.Key.Name} {node.Value}");
-                }
-                Console.WriteLine();
+                foreach (var add in toAdd) visited.Add(add);
             }
 
-            for (int i = 0; i < n - 1; i++)
+            for (int i = 0; i < n - 3; i++)
             {
-                foreach (var node in distances)
-                {
-                    Console.WriteLine($"{node.Key.Name} {node.Value}");
-                }
-                Console.WriteLine();
-                
-                PerformCycle(i);
+                PerformCycle();
             }
 
             return distances;
