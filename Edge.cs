@@ -11,7 +11,7 @@ namespace ADA_Assignment
     {
         public Node To { get; set; }
         public Node From { get; set; }
-        public readonly double Weight;
+        public double Weight { get; private set; }
 
         public Edge(Node n1, Node n2, double conversionRate)
         {
@@ -27,10 +27,7 @@ namespace ADA_Assignment
             Weight = weight;
         }
 
-        private static double RateToWeight(double d)
-        {
-            return -Math.Log10(d);
-        }
+        private static double RateToWeight(double d) => -Math.Log10(d);
 
         public static bool operator ==(Edge e1, Edge e2) => e1.To == e2.To && e1.From == e2.From;
         public static bool operator !=(Edge e1, Edge e2) => !(e1 == e2);

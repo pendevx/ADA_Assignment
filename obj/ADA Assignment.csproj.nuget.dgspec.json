@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\em18172\\Downloads\\ADA_Assignment\\ADA Assignment.csproj": {}
+    "D:\\Projects\\ADA Assignment\\ADA Assignment.csproj": {}
   },
   "projects": {
-    "C:\\Users\\em18172\\Downloads\\ADA_Assignment\\ADA Assignment.csproj": {
+    "D:\\Projects\\ADA Assignment\\ADA Assignment.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\em18172\\Downloads\\ADA_Assignment\\ADA Assignment.csproj",
+        "projectUniqueName": "D:\\Projects\\ADA Assignment\\ADA Assignment.csproj",
         "projectName": "ADA Assignment",
-        "projectPath": "C:\\Users\\em18172\\Downloads\\ADA_Assignment\\ADA Assignment.csproj",
-        "packagesPath": "C:\\Users\\em18172\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\em18172\\Downloads\\ADA_Assignment\\obj\\",
+        "projectPath": "D:\\Projects\\ADA Assignment\\ADA Assignment.csproj",
+        "packagesPath": "C:\\Users\\pendevx\\.nuget\\packages\\",
+        "outputPath": "D:\\Projects\\ADA Assignment\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\em18172\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\pendevx\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -26,6 +26,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -43,13 +44,20 @@
       "frameworks": {
         "net6.0": {
           "targetAlias": "net6.0",
+          "dependencies": {
+            "System.Net.Http": {
+              "target": "Package",
+              "version": "[4.3.4, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",
             "net47",
             "net471",
             "net472",
-            "net48"
+            "net48",
+            "net481"
           ],
           "assetTargetFallback": true,
           "warn": true,
@@ -58,7 +66,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.301\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.202\\RuntimeIdentifierGraph.json"
         }
       }
     }

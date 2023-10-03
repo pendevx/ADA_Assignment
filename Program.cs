@@ -1,12 +1,72 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Net.Http;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace ADA_Assignment
 {
     class Program
     {
+        private static string _key = "35a3ad0f2f253d37131b68cd1b5953fc";
+        private static string[] currencies = { "AUD", "CNY", "NZD", "USD", "EUR", "HKD", "NIO" };
+
         static void Main(string[] args)
         {
-            Graph2();
+            var client = new HttpClient();
+
+            var tasks = new Task<string>[currencies.Length];
+
+            for (int i = 0; i < currencies.Length; i++)
+            {
+                var res = FetchData(client, currencies[i]);
+                tasks[i] = res;
+            }
+            Task.WaitAll(tasks);
+            
+            var collectedData = new Response[tasks.Length];
+            
+            for (int i = 0; i < tasks.Length; i++)
+            {
+                Response data = JsonSerializer.Deserialize<Response>(new MemoryStream(Encoding.UTF8.GetBytes(tasks[i].Result)));
+                collectedData[i] = data;
+            }
+
+            var graph = BuildGraph(collectedData);
+
+            //File.WriteAllText("D:\\Projects\\ADA Assignment\\output.txt", res.Result);
+        }
+
+
+
+        // DEBUGGING ONLY ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+        static async Task<string> FetchDataFromCache()
+        {
+            var res = await File.ReadAllTextAsync("D:\\Projects\\ADA Assignment\\output.txt");
+            return res;
+        }
+        static void SaveToCache(Response[] data)
+        {
+            File.WriteAllText("D:\\Projects\\ADA Assignment\\output.txt", JsonSerializer.Serialize(data));
+        }
+
+        static async Task<string> FetchData(HttpClient client, string baseCurrency)
+        {
+            var response = await client.GetAsync($"http://data.fixer.io/api/latest?cbase=USD&access_key={_key}&cbase={baseCurrency}");
+            var result = await response.Content.ReadAsStringAsync();
+            return result;
+        }
+
+        static Graph BuildGraph(Response[] rates)
+        {
+            void CleanData()
+            {
+                
+            }
+
+            var graph = new Graph();
+
+            return graph;
         }
 
         static Graph Graph1()
@@ -41,6 +101,12 @@ namespace ADA_Assignment
             graph.AddEdge(ca);
             graph.AddEdge(cb);
             graph.AddEdge(cc);
+
+            Console.WriteLine(graph.ToString());
+
+            var res = graph.BellmanFord(c);
+
+            foreach (var x in res) Console.WriteLine($"{x.Key.Name} {x.Value}");
 
             return graph;
         }

@@ -27,7 +27,7 @@ namespace ADA_Assignment
         public void AddEdge(Edge e)
         {
             Edges.Add(e);
-            e.From.AddOutgoing(e);
+            e.To.AddIncoming(e);
         }
 
         public Dictionary<Node, double> BellmanFord(Node source)
@@ -35,39 +35,39 @@ namespace ADA_Assignment
             int infinity = 2147400000;
             var n = Nodes.Count;
             var distances = new Dictionary<Node, double>();
-            var visited = new List<Node>();
-            visited.Add(source);
 
             foreach (var node in Nodes) distances[node] = infinity;
             distances[source] = 0;
 
             void PerformCycle()
             {
-                var toAdd = new List<Node>();
-                foreach (var node in visited)
+                var newDistances = new Dictionary<Node, double>(distances);
+                foreach (var node in Nodes)
                 {
-                    if (distances[node] == infinity) continue;
-
-                    foreach (var e in node.OutgoingEdges)
+                    foreach (var edge in node.IncomingEdges)
                     {
-                        if (distances[e.To] == infinity)
-                        {
-                            distances[e.To] = distances[node] + e.Weight;
-                        }
+                        if (distances[edge.From] == infinity)
+                            continue;
+                        else if (edge.From == source)
+                            newDistances[node] = Math.Min(newDistances[node], edge.Weight);
                         else
-                        {
-                            distances[e.To] = Math.Min(distances[e.To], distances[e.From] + e.Weight);
-                        }
-                        toAdd.Add(e.To);
+                            newDistances[node] = Math.Min(newDistances[node], distances[edge.From] + edge.Weight);
                     }
                 }
-
-                foreach (var add in toAdd) visited.Add(add);
+                distances = newDistances;
             }
 
-            for (int i = 0; i < n - 3; i++)
+            for (int i = 0; i < n - 1; i++)
             {
                 PerformCycle();
+            }
+
+            var oldDistances = new Dictionary<Node, double>(distances).ToArray();
+            PerformCycle();
+            var distancesArr = distances.ToArray();
+            for (int i = 0; i < oldDistances.Length; i++)
+            {
+                Console.WriteLine(oldDistances[i].Value == distancesArr[i].Value ? "No arbitrage" : "Arbitrage found");
             }
 
             return distances;
