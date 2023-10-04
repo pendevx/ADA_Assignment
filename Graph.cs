@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.ConstrainedExecution;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
+﻿using System.Text;
 
 namespace ADA_Assignment
 {
@@ -30,18 +24,20 @@ namespace ADA_Assignment
             e.To.AddIncoming(e);
         }
 
-        public Dictionary<Node, double> BellmanFord(Node source)
+        public Dictionary<Node, decimal> BellmanFord(Node source)
         {
-            int infinity = 2147400000;
+            if (source == null) throw new ArgumentNullException("source cannot be null");
+            
+            int infinity = 2147000000;
             var n = Nodes.Count;
-            var distances = new Dictionary<Node, double>();
+            var distances = new Dictionary<Node, decimal>();
 
             foreach (var node in Nodes) distances[node] = infinity;
             distances[source] = 0;
 
             void PerformCycle()
             {
-                var newDistances = new Dictionary<Node, double>(distances);
+                var newDistances = new Dictionary<Node, decimal>(distances);
                 foreach (var node in Nodes)
                 {
                     foreach (var edge in node.IncomingEdges)
@@ -58,17 +54,17 @@ namespace ADA_Assignment
             }
 
             for (int i = 0; i < n - 1; i++)
-            {
                 PerformCycle();
-            }
 
-            var oldDistances = new Dictionary<Node, double>(distances).ToArray();
+            var oldDistances = new Dictionary<Node, decimal>(distances);
+
+            foreach (var d in distances)
+                Console.WriteLine($"{d.Key.Name} {d.Value}");
+
             PerformCycle();
-            var distancesArr = distances.ToArray();
-            for (int i = 0; i < oldDistances.Length; i++)
-            {
-                Console.WriteLine(oldDistances[i].Value == distancesArr[i].Value ? "No arbitrage" : "Arbitrage found");
-            }
+
+            foreach (var d in distances)
+                Console.WriteLine(d.Value == oldDistances[d.Key] ? "No arbitrage" : $"Arbitrage found in {d.Key.Name}");
 
             return distances;
         }
@@ -81,12 +77,18 @@ namespace ADA_Assignment
 
             foreach (var e in Edges)
             {
-                double val = Math.Round(e.Weight, 4);
+                double val = Math.Round((double)e.Weight, 4);
                 if (val == -0) val = 0;
                 sb.AppendLine($"{$"{e.From.Name}->{e.To.Name}".PadLeft(6)} {(val < 0 ? "" : " ")}      {val.ToString("0.0000")}");
             }
 
             return sb.ToString();
+        }
+
+        public Node GetNode(string name)
+        {
+            var res = Nodes.Where(x => x.Name == name).FirstOrDefault();
+            return res;
         }
     }
 }

@@ -15,7 +15,7 @@ namespace ADA_Assignment
     class Response
     {
         //public List<Rate> rates { get; set; }
-        public Dictionary<string, double> rates { get; set; }
+        public Dictionary<string, double> conversion_rates { get; set; }
         public bool success { get; set; }
     }
 }

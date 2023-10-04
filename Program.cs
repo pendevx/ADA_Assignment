@@ -1,15 +1,12 @@
-﻿using System;
-using System.Net.Http;
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace ADA_Assignment
 {
     class Program
     {
-        private static string _key = "35a3ad0f2f253d37131b68cd1b5953fc";
-        private static string[] currencies = { "AUD", "CNY", "NZD", "USD", "EUR", "HKD", "NIO" };
+        private static string _key = "7bab9b29ab1678992a96ca94";
+        private static string[] currencies = { "AUD", "RUB", "NZD", "USD", "EUR", "HKD", "GBP" };
 
         static void Main(string[] args)
         {
@@ -33,42 +30,55 @@ namespace ADA_Assignment
             }
 
             var graph = BuildGraph(collectedData);
+            var source = graph.GetNode("NZD");
 
-            //File.WriteAllText("D:\\Projects\\ADA Assignment\\output.txt", res.Result);
-        }
+            var x = graph.BellmanFord(source);
 
-
-
-        // DEBUGGING ONLY ---------------------------------------------------------------------------------------------------------------------------------------------------------------
-        static async Task<string> FetchDataFromCache()
-        {
-            var res = await File.ReadAllTextAsync("D:\\Projects\\ADA Assignment\\output.txt");
-            return res;
-        }
-        static void SaveToCache(Response[] data)
-        {
-            File.WriteAllText("D:\\Projects\\ADA Assignment\\output.txt", JsonSerializer.Serialize(data));
+            foreach (var distance in x)
+            {
+                Console.WriteLine($"{distance.Key.Name} {distance.Value}");
+            }
         }
 
         static async Task<string> FetchData(HttpClient client, string baseCurrency)
         {
-            var response = await client.GetAsync($"http://data.fixer.io/api/latest?cbase=USD&access_key={_key}&cbase={baseCurrency}");
+            var response = await client.GetAsync($"https://v6.exchangerate-api.com/v6/{_key}/latest/{baseCurrency}");
             var result = await response.Content.ReadAsStringAsync();
             return result;
         }
 
         static Graph BuildGraph(Response[] rates)
         {
-            void CleanData()
-            {
-                
-            }
+            var ExtractData = (Response r) => r.conversion_rates.Where(x => currencies.Contains(x.Key));
+
+            var conversionRates = new List<IEnumerable<KeyValuePair<string, double>>>(rates.Length);
+            Array.ForEach(rates, x => conversionRates.Add(ExtractData(x)));
 
             var graph = new Graph();
+            var nodes = new Node[currencies.Length];
+
+            for (int i = 0; i < currencies.Length; i++)
+            {
+                var node = new Node(currencies[i]);
+                graph.AddNode(node);
+                nodes[i] = node;
+            }
+
+            for (int i = 0; i < conversionRates.Count; i++)
+            {
+                foreach (var rate in conversionRates[i])
+                {
+                    var to = graph.GetNode(rate.Key);
+                    var edge = new Edge(nodes[i], to, rate.Value);
+                    graph.AddEdge(edge);
+                }
+            }
 
             return graph;
         }
 
+
+        // EXAMPLE GRAPHS FROM LECTURE SLIDES ---------------------------------------------------------------------------------------------------------------------------------------------------
         static Graph Graph1()
         {
             var graph = new Graph();
@@ -101,12 +111,6 @@ namespace ADA_Assignment
             graph.AddEdge(ca);
             graph.AddEdge(cb);
             graph.AddEdge(cc);
-
-            Console.WriteLine(graph.ToString());
-
-            var res = graph.BellmanFord(c);
-
-            foreach (var x in res) Console.WriteLine($"{x.Key.Name} {x.Value}");
 
             return graph;
         }
