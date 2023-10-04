@@ -19,7 +19,7 @@ namespace ADA_Assignment
         }
 
         public void AddEdge(Edge e)
-        {
+        { 
             Edges.Add(e);
             e.To.AddIncoming(e);
         }
