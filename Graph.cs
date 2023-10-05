@@ -31,6 +31,7 @@ namespace ADA_Assignment
         /// <param name="n">The node to add</param>
         public void AddNode(Node n)
         {
+            if (_i == Nodes.Length) throw new ApplicationException("Cannot add more nodes than the originally specified matrix size.");
             Nodes[_i] = n;
             n.ID = _i++;
         }
@@ -64,26 +65,67 @@ namespace ADA_Assignment
             return res;
         }
 
+        ///// <summary>
+        ///// Perform Floyd-Warshall algorithm on the graph
+        ///// </summary>
+        ///// <returns>The best conversion rate from any node to the rest</returns>
+        //public decimal[][] FindBestConversionRate() // Too generalized use case, needs to specialize for assignment
+        //{
+        //    var shortestDistances = Matrix.Clone() as decimal[][];
+
+        //    for (int k = 0; k < Nodes.Length; k++)
+        //    {
+        //        for (int j = 0; j < Nodes.Length; j++)
+        //        {
+        //            for (int i = 0; i < Nodes.Length; i++)
+        //            {
+        //                shortestDistances[i][j] = Math.Min(Matrix[i][j], Matrix[i][k] + Matrix[k][j]);
+        //            }
+        //        }
+        //    }
+
+        //    return shortestDistances;
+        //}
+
         /// <summary>
-        /// Finds the best conversion rate between any two pairs of nodes
+        /// Perform Floyd-Warshall algorithm on the graph
         /// </summary>
-        /// <returns>The best conversion rate from any node to the rest</returns>
-        public decimal[][] FindBestConversionRate() // Too generalized use case, needs to specialize for assignment
+        /// <returns>A function which takes in a source and a target string, and returns the best conversion rate from the source to the target</returns>
+        public Func<string, string, decimal> FindBestConversionRate() // Too generalized use case, needs to specialize for assignment
         {
             var shortestDistances = Matrix.Clone() as decimal[][];
 
             for (int k = 0; k < Nodes.Length; k++)
-            {
-                for (int j = 0; j < Nodes.Length; j++)
-                {
+                for (int j = 0; j < Nodes.Length; j++) // i and j is swapped as the matrix is rotated by 90 degrees
                     for (int i = 0; i < Nodes.Length; i++)
-                    {
                         shortestDistances[i][j] = Math.Min(Matrix[i][j], Matrix[i][k] + Matrix[k][j]);
-                    }
-                }
-            }
 
-            return shortestDistances;
+            PrintConversionRates(shortestDistances);
+
+            return (source, target) =>
+            {
+                var src = GetNode(source).ID;
+                var tgt = GetNode(target).ID;
+                return shortestDistances[src][tgt];
+            };
+        }
+
+        void PrintConversionRates(decimal[][] conversionRates)
+        {
+            Console.Write("".PadRight(5));
+            foreach (var node in Nodes)
+                Console.Write(node.Name.PadLeft(10));
+            Console.WriteLine();
+
+            for (int i = 0; i < conversionRates.Length; i++)
+            {
+                Console.Write(Nodes[i].Name.PadRight(7));
+
+                for (int j = 0; j < conversionRates[i].Length; j++)
+                    Console.Write($"{conversionRates[i][j],9:0.0000} ");
+
+                Console.WriteLine();
+            }
         }
 
         /// <summary>
@@ -123,8 +165,8 @@ namespace ADA_Assignment
             for (int i = 0; i < n - 1; i++)
                 PerformCycle();
 
-            //foreach (var d in distances)
-            //    Console.WriteLine($"{(d.Value < 0 ? "No arbitrage" : "Arbitrage")} found in {d.Key.Name}");
+            foreach (var d in distances)
+                Console.WriteLine($"{(d.Value >= 0 ? "No arbitrage" : "Arbitrage")} found in {d.Key.Name}");
 
             return distances;
         }

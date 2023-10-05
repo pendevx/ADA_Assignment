@@ -12,41 +12,29 @@ namespace ADA_Assignment
         {
             var client = new HttpClient();
 
-            var tasks = new Task<string>[currencies.Length];
-
-            for (int i = 0; i < currencies.Length; i++)
-                tasks[i] = FetchData(client, currencies[i]);
+            var tasks = currencies.Select(x => FetchData(client, x)).ToArray();
 
             Task.WaitAll(tasks);
-            
-            var collectedData = new Response[tasks.Length];
 
-            for (int i = 0; i < tasks.Length; i++)
-                collectedData[i] = DeserializeJson<Response>(tasks[i].Result);
+            var collectedData = tasks.Select(x => DeserializeJson<Response>(x.Result)).ToArray();
 
             var graph = BuildGraph(collectedData);
             //var graph = Graph3();
 
-            Console.Write("".PadRight(5));
-            foreach (var node in graph.Nodes)
-                Console.Write(node.Name.PadLeft(10));
-            Console.WriteLine();
-            var res1 = graph.FindBestConversionRate();
-            for (int i = 0; i < res1.Length; i++) {
-                Console.Write(graph.Nodes[i].Name.PadRight(7));
+            var res = graph.FindBestConversionRate();
 
-                for (int j = 0; j < res1[i].Length; j++)
-                    Console.Write($"{res1[i][j],9:0.0000} ");
-
-                Console.WriteLine();
+            while (true)
+            {
+                var inp = Console.ReadLine().ToUpper().Split(" ");
+                Console.WriteLine(res(inp[0], inp[1]));
             }
 
-            Console.WriteLine();
-            var source = graph.GetNode("NZD");
-            var res2 = graph.FindArbitrageOpportunities(source);
+            //Console.WriteLine();
+            //var source = graph.GetNode("NZD");
+            //var res2 = graph.FindArbitrageOpportunities(source);
 
-            foreach (var distance in res2)
-                Console.WriteLine($"{distance.Key.Name} {distance.Value}");
+            //foreach (var distance in res2)
+            //    Console.WriteLine($"{distance.Key.Name} {distance.Value}");
         }
 
         /// <summary>
@@ -63,12 +51,7 @@ namespace ADA_Assignment
         /// <param name="client">The HttpClient to make the request</param>
         /// <param name="baseCurrency">The base currency</param>
         /// <returns>The API response as a string</returns>
-        static async Task<string> FetchData(HttpClient client, string baseCurrency)
-        {
-            var response = await client.GetAsync($"https://v6.exchangerate-api.com/v6/{_key}/latest/{baseCurrency}");
-            var result = await response.Content.ReadAsStringAsync();
-            return result;
-        }
+        static async Task<string> FetchData(HttpClient client, string baseCurrency) => await client.GetStringAsync($"https://v6.exchangerate-api.com/v6/{_key}/latest/{baseCurrency}");
 
         /// <summary>
         /// Builds the graph from an array of responses
