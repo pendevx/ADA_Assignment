@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 
 namespace ADA_Assignment
 {
@@ -77,15 +78,8 @@ namespace ADA_Assignment
             for (int i = 0; i < n - 1; i++)
                 PerformCycle();
 
-            var oldDistances = new Dictionary<Node, decimal>(distances);
-
             foreach (var d in distances)
-                Console.WriteLine($"{d.Key.Name} {d.Value}");
-
-            PerformCycle();
-
-            foreach (var d in distances)
-                Console.WriteLine(d.Value == oldDistances[d.Key] ? "No arbitrage" : $"Arbitrage found in {d.Key.Name}");
+                Console.WriteLine($"{(d.Value < 0 ? "No arbitrage" : "Arbitrage")} found in {d.Key.Name}");
 
             return distances;
         }

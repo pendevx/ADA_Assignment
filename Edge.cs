@@ -25,7 +25,7 @@
         /// <param name="from">The starting node</param>
         /// <param name="to">The finishing node</param>
         /// <param name="weight">The edge weight</param>
-        /// <param name="flag">Pass a random object as a flag to activate this constructor. It will not participate in the construction of the edge object.</param>
+        /// <param name="flag">Pass a random object as a flag to activate this constructor. It will not participate in the construction of the Edge object.</param>
         public Edge(Node from, Node to, decimal weight, object flag)
         {
             From = from;
