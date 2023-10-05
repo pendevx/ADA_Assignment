@@ -24,28 +24,33 @@ namespace ADA_Assignment
             for (int i = 0; i < tasks.Length; i++)
                 collectedData[i] = DeserializeJson<Response>(tasks[i].Result);
 
-            //var graph = BuildGraph(collectedData);
-            //var source = graph.GetNode("NZD");
+            var graph = BuildGraph(collectedData);
+            //var graph = Graph3();
 
-            //var res = graph.FindArbitrageOpportunities(source);
+            Console.Write("".PadRight(5));
+            foreach (var node in graph.Nodes)
+                Console.Write(node.Name.PadLeft(10));
+            Console.WriteLine();
+            var res1 = graph.FindBestConversionRate();
+            for (int i = 0; i < res1.Length; i++) {
+                Console.Write(graph.Nodes[i].Name.PadRight(7));
 
-            //foreach (var distance in res)
-            //{
-            //    Console.WriteLine($"{distance.Key.Name} {distance.Value}");
-            //}
+                for (int j = 0; j < res1[i].Length; j++)
+                    Console.Write($"{res1[i][j],9:0.0000} ");
 
-            var graph = Graph3();
-
-            var res = graph.FindBestConversionRate();
-            for (int i = 0; i < res.Length; i++) {
-                for (int j = 0; j < res[i].Length; j++)
-                    Console.Write($"{res[i][j].ToString().PadLeft(5)} ");
                 Console.WriteLine();
-            }      
+            }
+
+            Console.WriteLine();
+            var source = graph.GetNode("NZD");
+            var res2 = graph.FindArbitrageOpportunities(source);
+
+            foreach (var distance in res2)
+                Console.WriteLine($"{distance.Key.Name} {distance.Value}");
         }
 
         /// <summary>
-        /// Deserialize a JSON string into an object
+        /// Deserialize a JSON string into an object of type T
         /// </summary>
         /// <typeparam name="T">The type of the object to be deserialized into</typeparam>
         /// <param name="str">The JSON string to deserialize</param>
@@ -102,90 +107,90 @@ namespace ADA_Assignment
 
 
         //// EXAMPLE GRAPHS FROM LECTURE SLIDES ---------------------------------------------------------------------------------------------------------------------------------------------------
-        //static Graph Graph1()
-        //{
-        //    var graph = new Graph(3);
-        //    int id = 0;
+        static Graph Graph1()
+        {
+            var graph = new Graph(3);
+            int id = 0;
 
-        //    var a = new Node("A");
-        //    var b = new Node("B");
-        //    var c = new Node("C");
+            var a = new Node("A");
+            var b = new Node("B");
+            var c = new Node("C");
 
-        //    var aa = new Edge(a, a, 1);
-        //    var ab = new Edge(a, b, 0.651);
-        //    var ac = new Edge(a, c, 0.581);
+            var aa = new Edge(a, a, 1);
+            var ab = new Edge(a, b, 0.651);
+            var ac = new Edge(a, c, 0.581);
 
-        //    var ba = new Edge(b, a, 1.531);
-        //    var bb = new Edge(b, b, 1);
-        //    var bc = new Edge(b, c, 0.952);
+            var ba = new Edge(b, a, 1.531);
+            var bb = new Edge(b, b, 1);
+            var bc = new Edge(b, c, 0.952);
 
-        //    var ca = new Edge(c, a, 1.711);
-        //    var cb = new Edge(c, b, 1.049);
-        //    var cc = new Edge(c, c, 1);
+            var ca = new Edge(c, a, 1.711);
+            var cb = new Edge(c, b, 1.049);
+            var cc = new Edge(c, c, 1);
 
-        //    graph.AddNode(a);
-        //    graph.AddNode(b);
-        //    graph.AddNode(c);
-        //    graph.AddEdge(aa);
-        //    graph.AddEdge(ab);
-        //    graph.AddEdge(ac);
-        //    graph.AddEdge(ba);
-        //    graph.AddEdge(bb);
-        //    graph.AddEdge(bc);
-        //    graph.AddEdge(ca);
-        //    graph.AddEdge(cb);
-        //    graph.AddEdge(cc);
+            graph.AddNode(a);
+            graph.AddNode(b);
+            graph.AddNode(c);
+            graph.AddEdge(aa);
+            graph.AddEdge(ab);
+            graph.AddEdge(ac);
+            graph.AddEdge(ba);
+            graph.AddEdge(bb);
+            graph.AddEdge(bc);
+            graph.AddEdge(ca);
+            graph.AddEdge(cb);
+            graph.AddEdge(cc);
 
-        //    return graph;
-        //}
+            return graph;
+        }
 
-        //static Graph Graph2()
-        //{
-        //    var graph = new Graph(8);
+        static Graph Graph2()
+        {
+            var graph = new Graph(8);
 
-        //    var s = new Node("S");
-        //    var a = new Node("A");
-        //    var b = new Node("B");
-        //    var c = new Node("C");
-        //    var d = new Node("D");
-        //    var e = new Node("E");
-        //    var f = new Node("F");
-        //    var G = new Node("G");
+            var s = new Node("S");
+            var a = new Node("A");
+            var b = new Node("B");
+            var c = new Node("C");
+            var d = new Node("D");
+            var e = new Node("E");
+            var f = new Node("F");
+            var G = new Node("G");
 
-        //    var sa = new Edge(s, a, 10, null);
-        //    var sg = new Edge(s, G, 8, null);
-        //    var ae = new Edge(a, e, 2, null);
-        //    var ba = new Edge(b, a, 1, null);
-        //    var bc = new Edge(b, c, 1, null);
-        //    var cd = new Edge(c, d, 3, null);
-        //    var de = new Edge(d, e, -1, null);
-        //    var eb = new Edge(e, b, -2, null);
-        //    var fa = new Edge(f, a, -4, null);
-        //    var fe = new Edge(f, e, -1, null);
-        //    var gf = new Edge(G, f, 1, null);
+            var sa = new Edge(s, a, 10, null);
+            var sg = new Edge(s, G, 8, null);
+            var ae = new Edge(a, e, 2, null);
+            var ba = new Edge(b, a, 1, null);
+            var bc = new Edge(b, c, 1, null);
+            var cd = new Edge(c, d, 3, null);
+            var de = new Edge(d, e, -1, null);
+            var eb = new Edge(e, b, -2, null);
+            var fa = new Edge(f, a, -4, null);
+            var fe = new Edge(f, e, -1, null);
+            var gf = new Edge(G, f, 1, null);
 
-        //    graph.AddNode(s);
-        //    graph.AddNode(a);
-        //    graph.AddNode(b);
-        //    graph.AddNode(c);
-        //    graph.AddNode(d);
-        //    graph.AddNode(e);
-        //    graph.AddNode(f);
-        //    graph.AddNode(G);
-        //    graph.AddEdge(sa);
-        //    graph.AddEdge(sg);
-        //    graph.AddEdge(ae);
-        //    graph.AddEdge(ba);
-        //    graph.AddEdge(bc);
-        //    graph.AddEdge(cd);
-        //    graph.AddEdge(de);
-        //    graph.AddEdge(eb);
-        //    graph.AddEdge(fa);
-        //    graph.AddEdge(fe);
-        //    graph.AddEdge(gf);
+            graph.AddNode(s);
+            graph.AddNode(a);
+            graph.AddNode(b);
+            graph.AddNode(c);
+            graph.AddNode(d);
+            graph.AddNode(e);
+            graph.AddNode(f);
+            graph.AddNode(G);
+            graph.AddEdge(sa);
+            graph.AddEdge(sg);
+            graph.AddEdge(ae);
+            graph.AddEdge(ba);
+            graph.AddEdge(bc);
+            graph.AddEdge(cd);
+            graph.AddEdge(de);
+            graph.AddEdge(eb);
+            graph.AddEdge(fa);
+            graph.AddEdge(fe);
+            graph.AddEdge(gf);
 
-        //    return graph;
-        //}
+            return graph;
+        }
 
         static Graph Graph3()
         {

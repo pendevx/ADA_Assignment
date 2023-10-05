@@ -8,7 +8,7 @@ namespace ADA_Assignment
         public decimal[][] Matrix { get; }
         public Node[] Nodes { get; }
         int _i = 0;
-        const int infinity = 2147000000;
+        public const int infinity = 2147000000;
 
         public Graph(int size)
         {
