@@ -15,6 +15,14 @@ namespace ADA_Assignment
             Matrix = new decimal[size][];
             Nodes = new Node[size];
             Matrix = Matrix.Select(x => new decimal[size]).ToArray();
+
+            for (int i =0;i < size; i++)
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    Matrix[i][j] = i == j ? 0 : infinity;
+                }
+            }
         }
 
         /// <summary>
@@ -57,12 +65,34 @@ namespace ADA_Assignment
         }
 
         /// <summary>
+        /// Finds the best conversion rate between any two pairs of nodes
+        /// </summary>
+        /// <returns>The best conversion rate from any node to the rest</returns>
+        public decimal[][] FindBestConversionRate() // Too generalized use case, needs to specialize for assignment
+        {
+            var shortestDistances = Matrix.Clone() as decimal[][];
+
+            for (int k = 0; k < Nodes.Length; k++)
+            {
+                for (int j = 0; j < Nodes.Length; j++)
+                {
+                    for (int i = 0; i < Nodes.Length; i++)
+                    {
+                        shortestDistances[i][j] = Math.Min(Matrix[i][j], Matrix[i][k] + Matrix[k][j]);
+                    }
+                }
+            }
+
+            return shortestDistances;
+        }
+
+        /// <summary>
         /// Perform Bellman Ford algorithm on the graph
         /// </summary>
         /// <param name="source">The source node</param>
         /// <returns>Distances from the source node to all other nodes</returns>
         /// <exception cref="ArgumentNullException">The source node is null</exception>
-        public Dictionary<Node, decimal> BellmanFord(Node source)
+        public Dictionary<Node, decimal> FindArbitrageOpportunities(Node source)
         {
             if (source == null) throw new ArgumentNullException("source cannot be null");
 

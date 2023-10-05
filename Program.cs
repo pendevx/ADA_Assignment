@@ -24,15 +24,24 @@ namespace ADA_Assignment
             for (int i = 0; i < tasks.Length; i++)
                 collectedData[i] = DeserializeJson<Response>(tasks[i].Result);
 
-            var graph = BuildGraph(collectedData);
-            var source = graph.GetNode("NZD");
+            //var graph = BuildGraph(collectedData);
+            //var source = graph.GetNode("NZD");
 
-            var res = graph.BellmanFord(source);
+            //var res = graph.FindArbitrageOpportunities(source);
 
-            foreach (var distance in res)
-            {
-                Console.WriteLine($"{distance.Key.Name} {distance.Value}");
-            }
+            //foreach (var distance in res)
+            //{
+            //    Console.WriteLine($"{distance.Key.Name} {distance.Value}");
+            //}
+
+            var graph = Graph3();
+
+            var res = graph.FindBestConversionRate();
+            for (int i = 0; i < res.Length; i++) {
+                for (int j = 0; j < res[i].Length; j++)
+                    Console.Write($"{res[i][j].ToString().PadLeft(5)} ");
+                Console.WriteLine();
+            }      
         }
 
         /// <summary>
@@ -177,5 +186,44 @@ namespace ADA_Assignment
 
         //    return graph;
         //}
+
+        static Graph Graph3()
+        {
+            var graph = new Graph(5);
+
+            var a = new Node("A");
+            var b = new Node("B");
+            var c = new Node("C");
+            var d = new Node("D");
+            var e = new Node("E");
+
+            var ab = new Edge(a, b, 3, null);
+            var ac = new Edge(a, c, 8, null);
+            var ae = new Edge(a, e, -4, null);
+            var bd = new Edge(b, d, 1, null);
+            var be = new Edge(b, e, 7, null);
+            var cb = new Edge(c, b, 4, null);
+            var da = new Edge(d, a, 2, null);
+            var dc = new Edge(d, c, -5, null);
+            var ed = new Edge(e, d, 6, null);
+
+            graph.AddNode(a);
+            graph.AddNode(b);
+            graph.AddNode(c);
+            graph.AddNode(d);
+            graph.AddNode(e);
+
+            graph.AddEdge(ab);
+            graph.AddEdge(ac);
+            graph.AddEdge(ae);
+            graph.AddEdge(bd);
+            graph.AddEdge(be);
+            graph.AddEdge(cb);
+            graph.AddEdge(da);
+            graph.AddEdge(dc);
+            graph.AddEdge(ed);
+
+            return graph;
+        }
     }
 }
