@@ -78,8 +78,8 @@ namespace ADA_Assignment
             for (int i = 0; i < n - 1; i++)
                 PerformCycle();
 
-            foreach (var d in distances)
-                Console.WriteLine($"{(d.Value < 0 ? "No arbitrage" : "Arbitrage")} found in {d.Key.Name}");
+            //foreach (var d in distances)
+            //    Console.WriteLine($"{(d.Value < 0 ? "No arbitrage" : "Arbitrage")} found in {d.Key.Name}");
 
             return distances;
         }
