@@ -15,29 +15,40 @@ namespace ADA_Assignment
             var tasks = new Task<string>[currencies.Length];
 
             for (int i = 0; i < currencies.Length; i++)
-            {
-                var res = FetchData(client, currencies[i]);
-                tasks[i] = res;
-            }
+                tasks[i] = FetchData(client, currencies[i]);
+
             Task.WaitAll(tasks);
             
             var collectedData = new Response[tasks.Length];
-            
-            //for (int i = 0; i < tasks.Length; i++)
-            //    collectedData[i] = JsonSerializer.Deserialize<Response>(new MemoryStream(Encoding.UTF8.GetBytes(tasks[i].Result)));
-            collectedData.Select((x, i) => JsonSerializer.Deserialize<Response>(new MemoryStream(Encoding.UTF8.GetBytes(tasks[i].Result))));
+
+            for (int i = 0; i < tasks.Length; i++)
+                collectedData[i] = DeserializeJson<Response>(tasks[i].Result);
 
             var graph = BuildGraph(collectedData);
             var source = graph.GetNode("NZD");
 
-            var x = graph.BellmanFord(source);
+            var res = graph.BellmanFord(source);
 
-            foreach (var distance in x)
+            foreach (var distance in res)
             {
                 Console.WriteLine($"{distance.Key.Name} {distance.Value}");
             }
         }
 
+        /// <summary>
+        /// Deserialize a JSON string into an object
+        /// </summary>
+        /// <typeparam name="T">The type of the object to be deserialized into</typeparam>
+        /// <param name="str">The JSON string to deserialize</param>
+        /// <returns>The object deserialized from its JSON format</returns>
+        static T DeserializeJson<T>(string str) => JsonSerializer.Deserialize<T>(new MemoryStream(Encoding.UTF8.GetBytes(str)));
+
+        /// <summary>
+        /// Fetches data from the api
+        /// </summary>
+        /// <param name="client">The HttpClient to make the request</param>
+        /// <param name="baseCurrency">The base currency</param>
+        /// <returns>The API response as a string</returns>
         static async Task<string> FetchData(HttpClient client, string baseCurrency)
         {
             var response = await client.GetAsync($"https://v6.exchangerate-api.com/v6/{_key}/latest/{baseCurrency}");
@@ -45,6 +56,11 @@ namespace ADA_Assignment
             return result;
         }
 
+        /// <summary>
+        /// Builds the graph from an array of responses
+        /// </summary>
+        /// <param name="rates">The rates to convert into the graph</param>
+        /// <returns>The graph built from the array of responses</returns>
         static Graph BuildGraph(Response[] rates)
         {
             var ExtractData = (Response r) => r.conversion_rates.Where(x => currencies.Contains(x.Key));

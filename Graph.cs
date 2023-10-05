@@ -5,48 +5,63 @@ namespace ADA_Assignment
 {
     class Graph
     {
-        //public HashSet<Node> Nodes { get; private set; }
-        //public HashSet<Edge> Edges { get; private set; }
-        public decimal[][] Matrix { get; private set; }
-        public Node[] Nodes { get; private set; }
-        private int _i = 0; 
+        public decimal[][] Matrix { get; }
+        public Node[] Nodes { get; }
+        int _i = 0;
         const int infinity = 2147000000;
 
         public Graph(int size)
         {
             Matrix = new decimal[size][];
             Nodes = new Node[size];
-            for (int i = 0; i < size; i++) Matrix[i] = new decimal[size];
+            Matrix = Matrix.Select(x => new decimal[size]).ToArray();
         }
 
+        /// <summary>
+        /// Add a node to the graph
+        /// </summary>
+        /// <param name="n">The node to add</param>
         public void AddNode(Node n)
         {
             Nodes[_i] = n;
             n.ID = _i++;
         }
 
+        /// <summary>
+        /// Add an edge to the graph
+        /// </summary>
+        /// <param name="e">The edge to add</param>
         public void AddEdge(Edge e)
         {
             Matrix[e.From.ID][e.To.ID] = e.Weight;
         }
 
+        /// <summary>
+        /// Get all the incoming edges into a node
+        /// Incoming edges are those which have a FROM as a non-null Node and have a TO matching the parameter <paramref name="n"/>
+        /// </summary>
+        /// <param name="n">The node the get incoming edges for</param>
+        /// <returns>The edges which enter the node</returns>
         private List<Edge> GetIncomingEdges(Node n)
         {
             var res = new List<Edge>();
             for (int i = 0; i < Nodes.Length; i++)
             {
-                //res[i] = new Edge(Nodes[i], n, (double)Matrix[i][n.ID]);
-                //var weight = (int)Matrix[i][n.ID];
                 var weight = Matrix[i][n.ID];
                 if (weight == 0) continue;
 
-                //var e = new Edge(Nodes[i], n, weight, null);
                 var e = new Edge(Nodes[i], n, weight, null);
                 res.Add(e);
             }
             return res;
         }
 
+        /// <summary>
+        /// Perform Bellman Ford algorithm on the graph
+        /// </summary>
+        /// <param name="source">The source node</param>
+        /// <returns>Distances from the source node to all other nodes</returns>
+        /// <exception cref="ArgumentNullException">The source node is null</exception>
         public Dictionary<Node, decimal> BellmanFord(Node source)
         {
             if (source == null) throw new ArgumentNullException("source cannot be null");
@@ -100,6 +115,11 @@ namespace ADA_Assignment
         //    return sb.ToString();
         //}
 
+        /// <summary>
+        /// Gets a node
+        /// </summary>
+        /// <param name="name">The name of the node to retrieve</param>
+        /// <returns>The node with a name matching <paramref name="name"/></returns>
         public Node GetNode(string name)
         {
             var res = Nodes.Where(x => x.Name == name).FirstOrDefault();
