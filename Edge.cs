@@ -6,6 +6,12 @@
         public Node From { get; set; }
         public decimal Weight { get; private set; }
 
+        /// <summary>
+        /// Use this constructor to pass in a conversion rate which needs to be converted into an edge weight
+        /// </summary>
+        /// <param name="from">The starting node</param>
+        /// <param name="to">The finishing node</param>
+        /// <param name="conversionRate">The rate of conversion</param>
         public Edge(Node from, Node to, double conversionRate)
         {
             From = from;
@@ -13,10 +19,17 @@
             Weight = RateToWeight(conversionRate);
         }
 
-        public Edge(Node n1, Node n2, int weight, object flag)
+        /// <summary>
+        /// Use this constructor to pass in an edge weight (do not convert)
+        /// </summary>
+        /// <param name="from">The starting node</param>
+        /// <param name="to">The finishing node</param>
+        /// <param name="weight">The edge weight</param>
+        /// <param name="flag">Pass a random object as a flag to activate this constructor. It will not participate in the construction of the edge object.</param>
+        public Edge(Node from, Node to, decimal weight, object flag)
         {
-            From = n1;
-            To = n2;
+            From = from;
+            To = to;
             Weight = weight;
         }
 

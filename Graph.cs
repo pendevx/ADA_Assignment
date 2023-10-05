@@ -4,32 +4,53 @@ namespace ADA_Assignment
 {
     class Graph
     {
-        public HashSet<Node> Nodes { get; private set; }
-        public HashSet<Edge> Edges { get; private set; }
+        //public HashSet<Node> Nodes { get; private set; }
+        //public HashSet<Edge> Edges { get; private set; }
+        public decimal[][] Matrix { get; private set; }
+        public Node[] Nodes { get; private set; }
+        private int _i = 0; 
+        const int infinity = 2147000000;
 
-        public Graph()
+        public Graph(int size)
         {
-            Nodes = new();
-            Edges = new();
+            Matrix = new decimal[size][];
+            Nodes = new Node[size];
+            for (int i = 0; i < size; i++) Matrix[i] = new decimal[size];
         }
 
         public void AddNode(Node n)
         {
-            Nodes.Add(n);
+            Nodes[_i] = n;
+            n.ID = _i++;
         }
 
         public void AddEdge(Edge e)
-        { 
-            Edges.Add(e);
-            e.To.AddIncoming(e);
+        {
+            Matrix[e.From.ID][e.To.ID] = e.Weight;
+        }
+
+        private List<Edge> GetIncomingEdges(Node n)
+        {
+            var res = new List<Edge>();
+            for (int i = 0; i < Nodes.Length; i++)
+            {
+                //res[i] = new Edge(Nodes[i], n, (double)Matrix[i][n.ID]);
+                //var weight = (int)Matrix[i][n.ID];
+                var weight = Matrix[i][n.ID];
+                if (weight == 0) continue;
+
+                //var e = new Edge(Nodes[i], n, weight, null);
+                var e = new Edge(Nodes[i], n, weight, null);
+                res.Add(e);
+            }
+            return res;
         }
 
         public Dictionary<Node, decimal> BellmanFord(Node source)
         {
             if (source == null) throw new ArgumentNullException("source cannot be null");
-            
-            int infinity = 2147000000;
-            var n = Nodes.Count;
+
+            var n = Nodes.Length;
             var distances = new Dictionary<Node, decimal>();
 
             foreach (var node in Nodes) distances[node] = infinity;
@@ -40,7 +61,7 @@ namespace ADA_Assignment
                 var newDistances = new Dictionary<Node, decimal>(distances);
                 foreach (var node in Nodes)
                 {
-                    foreach (var edge in node.IncomingEdges)
+                    foreach (var edge in GetIncomingEdges(node))
                     {
                         if (distances[edge.From] == infinity)
                             continue;
@@ -69,21 +90,21 @@ namespace ADA_Assignment
             return distances;
         }
 
-        public override string ToString()
-        {
-            var sb = new StringBuilder();
+        //public override string ToString()
+        //{
+        //    var sb = new StringBuilder();
 
-            sb.AppendLine("FROM->TO    EDGE WEIGHT");
+        //    sb.AppendLine("FROM->TO    EDGE WEIGHT");
 
-            foreach (var e in Edges)
-            {
-                double val = Math.Round((double)e.Weight, 4);
-                if (val == -0) val = 0;
-                sb.AppendLine($"{$"{e.From.Name}->{e.To.Name}".PadLeft(6)} {(val < 0 ? "" : " ")}      {val.ToString("0.0000")}");
-            }
+        //    foreach (var e in Edges)
+        //    {
+        //        double val = Math.Round((double)e.Weight, 4);
+        //        if (val == -0) val = 0;
+        //        sb.AppendLine($"{$"{e.From.Name}->{e.To.Name}".PadLeft(6)} {(val < 0 ? "" : " ")}      {val.ToString("0.0000")}");
+        //    }
 
-            return sb.ToString();
-        }
+        //    return sb.ToString();
+        //}
 
         public Node GetNode(string name)
         {

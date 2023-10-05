@@ -54,7 +54,7 @@ namespace ADA_Assignment
             var conversionRates = new List<IEnumerable<KeyValuePair<string, double>>>(rates.Length);
             Array.ForEach(rates, x => conversionRates.Add(ExtractData(x)));
 
-            var graph = new Graph();
+            var graph = new Graph(currencies.Length);
             var nodes = new Node[currencies.Length];
 
             for (int i = 0; i < currencies.Length; i++)
@@ -78,46 +78,47 @@ namespace ADA_Assignment
         }
 
 
-        // EXAMPLE GRAPHS FROM LECTURE SLIDES ---------------------------------------------------------------------------------------------------------------------------------------------------
-        static Graph Graph1()
-        {
-            var graph = new Graph();
+        //// EXAMPLE GRAPHS FROM LECTURE SLIDES ---------------------------------------------------------------------------------------------------------------------------------------------------
+        //static Graph Graph1()
+        //{
+        //    var graph = new Graph();
+        //    int id = 0;
 
-            var a = new Node("A");
-            var b = new Node("B");
-            var c = new Node("C");
+        //    var a = new Node("A", id++);
+        //    var b = new Node("B", id++);
+        //    var c = new Node("C", id++);
 
-            var aa = new Edge(a, a, 1);
-            var ab = new Edge(a, b, 0.651);
-            var ac = new Edge(a, c, 0.581);
+        //    var aa = new Edge(a, a, 1);
+        //    var ab = new Edge(a, b, 0.651);
+        //    var ac = new Edge(a, c, 0.581);
 
-            var ba = new Edge(b, a, 1.531);
-            var bb = new Edge(b, b, 1);
-            var bc = new Edge(b, c, 0.952);
+        //    var ba = new Edge(b, a, 1.531);
+        //    var bb = new Edge(b, b, 1);
+        //    var bc = new Edge(b, c, 0.952);
 
-            var ca = new Edge(c, a, 1.711);
-            var cb = new Edge(c, b, 1.049);
-            var cc = new Edge(c, c, 1);
+        //    var ca = new Edge(c, a, 1.711);
+        //    var cb = new Edge(c, b, 1.049);
+        //    var cc = new Edge(c, c, 1);
 
-            graph.AddNode(a);
-            graph.AddNode(b);
-            graph.AddNode(c);
-            graph.AddEdge(aa);
-            graph.AddEdge(ab);
-            graph.AddEdge(ac);
-            graph.AddEdge(ba);
-            graph.AddEdge(bb);
-            graph.AddEdge(bc);
-            graph.AddEdge(ca);
-            graph.AddEdge(cb);
-            graph.AddEdge(cc);
+        //    graph.AddNode(a);
+        //    graph.AddNode(b);
+        //    graph.AddNode(c);
+        //    graph.AddEdge(aa);
+        //    graph.AddEdge(ab);
+        //    graph.AddEdge(ac);
+        //    graph.AddEdge(ba);
+        //    graph.AddEdge(bb);
+        //    graph.AddEdge(bc);
+        //    graph.AddEdge(ca);
+        //    graph.AddEdge(cb);
+        //    graph.AddEdge(cc);
 
-            return graph;
-        }
+        //    return graph;
+        //}
 
         static Graph Graph2()
         {
-            var graph = new Graph();
+            var graph = new Graph(8);
 
             var s = new Node("S");
             var a = new Node("A");
@@ -159,12 +160,6 @@ namespace ADA_Assignment
             graph.AddEdge(fa);
             graph.AddEdge(fe);
             graph.AddEdge(gf);
-
-            Console.WriteLine(graph.ToString());
-
-            var res = graph.BellmanFord(s);
-
-            foreach (var x in res) Console.WriteLine($"{x.Key.Name} {x.Value}");
 
             return graph;
         }
