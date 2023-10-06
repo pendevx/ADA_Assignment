@@ -18,8 +18,8 @@ namespace ADA_Assignment
 
             var collectedData = tasks.Select(x => DeserializeJson<Response>(x.Result)).ToArray();
 
-            var graph = BuildGraph(collectedData);
-            //var graph = Graph3();
+            //var graph = BuildGraph(collectedData);
+            var graph = Graph3();
 
             var res = graph.FindBestConversionRate();
 

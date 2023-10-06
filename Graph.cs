@@ -91,22 +91,50 @@ namespace ADA_Assignment
         /// Perform Floyd-Warshall algorithm on the graph
         /// </summary>
         /// <returns>A function which takes in a source and a target string, and returns the best conversion rate from the source to the target</returns>
-        public Func<string, string, decimal> FindBestConversionRate() // Too generalized use case, needs to specialize for assignment
+        public Func<string, string, (decimal, List<Node>)> FindBestConversionRate() // Too generalized use case, needs to specialize for assignment
         {
-            var shortestDistances = Matrix.Clone() as decimal[][];
+            var shortestDistances = (decimal[][])Matrix.Clone();
+            var prev = Nodes.ToDictionary(x => x);
 
             for (int k = 0; k < Nodes.Length; k++)
+            {
                 for (int j = 0; j < Nodes.Length; j++) // i and j is swapped as the matrix is rotated by 90 degrees
+                {
                     for (int i = 0; i < Nodes.Length; i++)
-                        shortestDistances[i][j] = Math.Min(Matrix[i][j], Matrix[i][k] + Matrix[k][j]);
+                    {
+                        var org = Matrix[i][j];
+                        var newval = Matrix[i][k] + Matrix[k][j];
+
+                        if (newval < org)
+                        {
+                            shortestDistances[i][j] = newval;
+                            // j gets k as a previous
+                            prev[Nodes[j]] = Nodes[k];
+                        }
+
+                        //shortestDistances[i][j] = Math.Min(Matrix[i][j], Matrix[i][k] + Matrix[k][j]);
+                    }
+                }
+            }
 
             PrintConversionRates(shortestDistances);
 
             return (source, target) =>
             {
-                var src = GetNode(source).ID;
-                var tgt = GetNode(target).ID;
-                return shortestDistances[src][tgt];
+                var src = GetNode(source);
+                var tgt = GetNode(target);
+
+                var res = new List<Node>();
+
+                var curr = tgt;
+                while (curr != src)
+                {
+
+                    var previous = prev[tgt];
+                    
+                }
+
+                return (shortestDistances[src.ID][tgt.ID], res);
             };
         }
 
