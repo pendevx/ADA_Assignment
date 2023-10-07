@@ -17,7 +17,7 @@ namespace ADA_Assignment
             Nodes = new Node[size];
             Matrix = Matrix.Select(x => new decimal[size]).ToArray();
 
-            for (int i =0;i < size; i++)
+            for (int i = 0; i < size; i++)
             {
                 for (int j = 0; j < size; j++)
                 {
