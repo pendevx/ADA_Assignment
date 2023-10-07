@@ -38,7 +38,7 @@
         /// </summary>
         /// <param name="d">The conversion rate</param>
         /// <returns>The corresponding edge weight [ -log10(d) ]</returns>
-        private static decimal RateToWeight(double d) => (decimal)-Math.Log10(d);
+        static decimal RateToWeight(double d) => (decimal)-Math.Log10(d);
 
         //public static bool operator ==(Edge e1, Edge e2) => e1.To == e2.To && e1.From == e2.From;
         //public static bool operator !=(Edge e1, Edge e2) => !(e1 == e2);

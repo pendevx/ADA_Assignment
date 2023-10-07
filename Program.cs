@@ -1,12 +1,13 @@
 ﻿using System.Text;
 using System.Text.Json;
+using System.Xml;
 
 namespace ADA_Assignment
 {
     class Program
     {
-        private static string _key = "7bab9b29ab1678992a96ca94";
-        private static string[] currencies = { "AUD", "RUB", "NZD", "USD", "EUR", "HKD", "GBP" };
+        static readonly string _key = "7bab9b29ab1678992a96ca94";
+        static readonly string[] currencies = { "AUD", "RUB", "NZD", "USD", "EUR", "HKD", "GBP" };
 
         static void Main(string[] args)
         {
@@ -18,23 +19,25 @@ namespace ADA_Assignment
 
             var collectedData = tasks.Select(x => DeserializeJson<Response>(x.Result)).ToArray();
 
-            //var graph = BuildGraph(collectedData);
-            var graph = Graph3();
+            var graph = BuildGraph(collectedData);
+            //var graph = Graph3();
 
             var res = graph.FindBestConversionRate();
 
-            while (true)
-            {
-                var inp = Console.ReadLine().ToUpper().Split(" ");
-                Console.WriteLine(res(inp[0], inp[1]));
-            }
+            Console.WriteLine("Enter the source currency and terminal currency, and we will find the best change exchange path for you");
+            Console.WriteLine("Please enter the currencies split up using a space (e.g. 'CurrencyA CurrencyB'):");
+            var inp = Console.ReadLine().ToUpper().Trim().Split(" ");
+            var (rate, path) = res(inp[0], inp[1]);
+            Console.WriteLine(rate);
 
-            //Console.WriteLine();
-            //var source = graph.GetNode("NZD");
-            //var res2 = graph.FindArbitrageOpportunities(source);
+            foreach (var node in path) Console.Write($"{node.Name} ");
+            Console.WriteLine();
 
-            //foreach (var distance in res2)
-            //    Console.WriteLine($"{distance.Key.Name} {distance.Value}");
+            Console.WriteLine();
+            Console.WriteLine("Enter a currency and we will check if there is any arbitrary opportunities: ");
+            var currency = Console.ReadLine().Trim();
+            var source = graph.GetNode(currency);
+            var res2 = graph.FindArbitrageOpportunities(source);
         }
 
         /// <summary>

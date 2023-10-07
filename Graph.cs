@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Immutable;
 using System.Text;
 
 namespace ADA_Assignment
@@ -51,7 +52,7 @@ namespace ADA_Assignment
         /// </summary>
         /// <param name="n">The node the get incoming edges for</param>
         /// <returns>The edges which enter the node</returns>
-        private List<Edge> GetIncomingEdges(Node n)
+        List<Edge> GetIncomingEdges(Node n)
         {
             var res = new List<Edge>();
             for (int i = 0; i < Nodes.Length; i++)
@@ -94,7 +95,8 @@ namespace ADA_Assignment
         public Func<string, string, (decimal, List<Node>)> FindBestConversionRate() // Too generalized use case, needs to specialize for assignment
         {
             var shortestDistances = (decimal[][])Matrix.Clone();
-            var prev = Nodes.ToDictionary(x => x);
+            var prev = Nodes.Select(x => new Node[Nodes.Length].Select(y => x).ToArray()).ToArray();
+
 
             for (int k = 0; k < Nodes.Length; k++)
             {
@@ -108,11 +110,10 @@ namespace ADA_Assignment
                         if (newval < org)
                         {
                             shortestDistances[i][j] = newval;
-                            // j gets k as a previous
-                            prev[Nodes[j]] = Nodes[k];
-                        }
 
-                        //shortestDistances[i][j] = Math.Min(Matrix[i][j], Matrix[i][k] + Matrix[k][j]);
+                            // set the previous of [i][j] to be the previous of [k][j]
+                            prev[i][j] = prev[k][j];
+                        }
                     }
                 }
             }
@@ -123,16 +124,15 @@ namespace ADA_Assignment
             {
                 var src = GetNode(source);
                 var tgt = GetNode(target);
-
                 var res = new List<Node>();
 
-                var curr = tgt;
-                while (curr != src)
+                while (src != tgt)
                 {
-
-                    var previous = prev[tgt];
-                    
+                    res.Add(tgt);
+                    tgt = prev[src.ID][tgt.ID];
                 }
+                res.Add(src);
+                res.Reverse();
 
                 return (shortestDistances[src.ID][tgt.ID], res);
             };
@@ -154,6 +154,7 @@ namespace ADA_Assignment
 
                 Console.WriteLine();
             }
+            Console.WriteLine("\n");
         }
 
         /// <summary>
@@ -193,8 +194,7 @@ namespace ADA_Assignment
             for (int i = 0; i < n - 1; i++)
                 PerformCycle();
 
-            foreach (var d in distances)
-                Console.WriteLine($"{(d.Value >= 0 ? "No arbitrage" : "Arbitrage")} found in {d.Key.Name}");
+            Console.WriteLine(distances[source] < 0 ? "Arbitrage" : "No arbitrage");
 
             return distances;
         }
