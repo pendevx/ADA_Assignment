@@ -66,28 +66,6 @@ namespace ADA_Assignment
             return res;
         }
 
-        ///// <summary>
-        ///// Perform Floyd-Warshall algorithm on the graph
-        ///// </summary>
-        ///// <returns>The best conversion rate from any node to the rest</returns>
-        //public decimal[][] FindBestConversionRate() // Too generalized use case, needs to specialize for assignment
-        //{
-        //    var shortestDistances = Matrix.Clone() as decimal[][];
-
-        //    for (int k = 0; k < Nodes.Length; k++)
-        //    {
-        //        for (int j = 0; j < Nodes.Length; j++)
-        //        {
-        //            for (int i = 0; i < Nodes.Length; i++)
-        //            {
-        //                shortestDistances[i][j] = Math.Min(Matrix[i][j], Matrix[i][k] + Matrix[k][j]);
-        //            }
-        //        }
-        //    }
-
-        //    return shortestDistances;
-        //}
-
         /// <summary>
         /// Perform Floyd-Warshall algorithm on the graph
         /// </summary>
@@ -160,11 +138,12 @@ namespace ADA_Assignment
         /// <summary>
         /// Perform Bellman Ford algorithm on the graph
         /// </summary>
-        /// <param name="source">The source node</param>
+        /// <param name="src">The source node's name</param>
         /// <returns>Distances from the source node to all other nodes</returns>
         /// <exception cref="ArgumentNullException">The source node is null</exception>
-        public Dictionary<Node, decimal> FindArbitrageOpportunities(Node source)
+        public Dictionary<Node, decimal> FindArbitrageOpportunities(string src)
         {
+            var source = GetNode(src);
             if (source == null) throw new ArgumentNullException("source cannot be null");
 
             var n = Nodes.Length;
@@ -198,22 +177,6 @@ namespace ADA_Assignment
 
             return distances;
         }
-
-        //public override string ToString()
-        //{
-        //    var sb = new StringBuilder();
-
-        //    sb.AppendLine("FROM->TO    EDGE WEIGHT");
-
-        //    foreach (var e in Edges)
-        //    {
-        //        double val = Math.Round((double)e.Weight, 4);
-        //        if (val == -0) val = 0;
-        //        sb.AppendLine($"{$"{e.From.Name}->{e.To.Name}".PadLeft(6)} {(val < 0 ? "" : " ")}      {val.ToString("0.0000")}");
-        //    }
-
-        //    return sb.ToString();
-        //}
 
         /// <summary>
         /// Gets a node
