@@ -34,9 +34,9 @@ namespace ADA_Assignment
             Console.WriteLine();
 
             Console.WriteLine();
-            Console.WriteLine("Enter a currency and we will check if there is any arbitrary opportunities: ");
-            var currency = Console.ReadLine().Trim();
-            var res2 = graph.FindArbitrageOpportunities(currency);
+            Console.WriteLine("Now we will check if there is any arbitrary opportunities: ");
+            for (int i = 0; i < graph.Nodes.Length; i++)
+                graph.FindArbitrageOpportunities(graph.Nodes[i].Name);
         }
 
         /// <summary>

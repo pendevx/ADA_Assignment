@@ -73,7 +73,7 @@ namespace ADA_Assignment
         public Func<string, string, (decimal, List<Node>)> FindBestConversionRate() // Too generalized use case, needs to specialize for assignment
         {
             var shortestDistances = (decimal[][])Matrix.Clone();
-            var prev = Nodes.Select(x => new Node[Nodes.Length].Select(y => x).ToArray()).ToArray();
+            var prev = Nodes.Select(x => new Node[Nodes.Length].Select(y =>  x).ToArray()).ToArray();
 
 
             for (int k = 0; k < Nodes.Length; k++)
@@ -161,7 +161,8 @@ namespace ADA_Assignment
                     {
                         if (distances[edge.From] == infinity)
                             continue;
-                        else if (edge.From == source)
+
+                        if (edge.From == source)
                             newDistances[node] = Math.Min(newDistances[node], edge.Weight);
                         else
                             newDistances[node] = Math.Min(newDistances[node], distances[edge.From] + edge.Weight);
@@ -173,7 +174,7 @@ namespace ADA_Assignment
             for (int i = 0; i < n - 1; i++)
                 PerformCycle();
 
-            Console.WriteLine(distances[source] < 0 ? "Arbitrage" : "No arbitrage");
+            Console.WriteLine($"{(distances[source] < 0 ? "Arbitrage" : "No arbitrage")} in {src}");
 
             return distances;
         }
