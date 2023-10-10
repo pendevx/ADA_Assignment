@@ -73,7 +73,7 @@ namespace ADA_Assignment
         public Func<string, string, (decimal, List<Node>)> FindBestConversionRate() // Too generalized use case, needs to specialize for assignment
         {
             var shortestDistances = (decimal[][])Matrix.Clone();
-            var prev = Nodes.Select(x => new Node[Nodes.Length].Select(y =>  x).ToArray()).ToArray();
+            var prev = Nodes.Select(x => new Node[Nodes.Length].Select(y => x).ToArray()).ToArray();
 
 
             for (int k = 0; k < Nodes.Length; k++)
@@ -141,13 +141,15 @@ namespace ADA_Assignment
         /// <param name="src">The source node's name</param>
         /// <returns>Distances from the source node to all other nodes</returns>
         /// <exception cref="ArgumentNullException">The source node is null</exception>
-        public Dictionary<Node, decimal> FindArbitrageOpportunities(string src)
+        public IList<Node> FindArbitrageOpportunities(string src)
         {
             var source = GetNode(src);
             if (source == null) throw new ArgumentNullException("source cannot be null");
 
             var n = Nodes.Length;
             var distances = new Dictionary<Node, decimal>();
+
+            var prev = new Dictionary<Node, Node>();
 
             foreach (var node in Nodes) distances[node] = infinity;
             distances[source] = 0;
@@ -163,9 +165,15 @@ namespace ADA_Assignment
                             continue;
 
                         if (edge.From == source)
+                        {
                             newDistances[node] = Math.Min(newDistances[node], edge.Weight);
+                            prev[edge.To] = source;
+                        }
                         else
+                        {
                             newDistances[node] = Math.Min(newDistances[node], distances[edge.From] + edge.Weight);
+                            prev[edge.To] = node;
+                        }
                     }
                 }
                 distances = newDistances;
@@ -176,7 +184,17 @@ namespace ADA_Assignment
 
             Console.WriteLine($"{(distances[source] < 0 ? "Arbitrage" : "No arbitrage")} in {src}");
 
-            return distances;
+            if (distances[source] >= 0) return null;
+
+            var path = new List<Node>();
+            var curr = source;
+            do
+            {
+                path.Add(curr);
+                curr = prev[curr];
+            } while (source != curr);
+
+            return path;
         }
 
         /// <summary>

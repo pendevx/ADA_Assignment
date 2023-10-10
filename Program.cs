@@ -6,7 +6,7 @@ namespace ADA_Assignment
 {
     class Program
     {
-        static readonly string _key = "7bab9b29ab1678992a96ca94";
+        static readonly string _key = "592ba3456dc1f48f236c1d34";
         static readonly string[] currencies = { "AUD", "RUB", "NZD", "USD", "EUR", "HKD", "GBP" };
 
         static void Main(string[] args)
@@ -19,8 +19,8 @@ namespace ADA_Assignment
 
             var collectedData = tasks.Select(x => DeserializeJson<Response>(x.Result)).ToArray();
 
-            var graph = BuildGraph(collectedData);
-            //var graph = Graph3();
+            //var graph = BuildGraph(collectedData);
+            var graph = Graph1(); // spectre
 
             var res = graph.FindBestConversionRate();
 
@@ -36,7 +36,15 @@ namespace ADA_Assignment
             Console.WriteLine();
             Console.WriteLine("Now we will check if there is any arbitrary opportunities: ");
             for (int i = 0; i < graph.Nodes.Length; i++)
-                graph.FindArbitrageOpportunities(graph.Nodes[i].Name);
+            {
+                var bfPath = graph.FindArbitrageOpportunities(graph.Nodes[i].Name);
+                if (bfPath == null) continue;
+
+                foreach (var x in bfPath)
+                    Console.Write(x.Name + " ");
+
+                Console.WriteLine();
+            }
         }
 
         /// <summary>
@@ -95,7 +103,6 @@ namespace ADA_Assignment
         static Graph Graph1()
         {
             var graph = new Graph(3);
-            int id = 0;
 
             var a = new Node("A");
             var b = new Node("B");
