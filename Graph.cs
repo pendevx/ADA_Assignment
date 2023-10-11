@@ -58,7 +58,8 @@ namespace ADA_Assignment
             for (int i = 0; i < Nodes.Length; i++)
             {
                 var weight = Matrix[i][n.ID];
-                if (weight == 0) continue;
+                if (weight == infinity) continue;
+                if (Nodes[i] == n) continue;
 
                 var e = new Edge(Nodes[i], n, weight, null);
                 res.Add(e);
@@ -70,11 +71,10 @@ namespace ADA_Assignment
         /// Perform Floyd-Warshall algorithm on the graph
         /// </summary>
         /// <returns>A function which takes in a source and a target string, and returns the best conversion rate from the source to the target</returns>
-        public Func<string, string, (decimal, List<Node>)> FindBestConversionRate() // Too generalized use case, needs to specialize for assignment
+        public Func<string, string, (decimal, List<Node>?)> FindBestConversionRate() // Too generalized use case, needs to specialize for assignment
         {
             var shortestDistances = (decimal[][])Matrix.Clone();
             var prev = Nodes.Select(x => new Node[Nodes.Length].Select(y => x).ToArray()).ToArray();
-
 
             for (int k = 0; k < Nodes.Length; k++)
             {
@@ -103,16 +103,20 @@ namespace ADA_Assignment
                 var src = GetNode(source);
                 var tgt = GetNode(target);
                 var res = new List<Node>();
+                var distResult = shortestDistances[src.ID][tgt.ID];
 
                 while (src != tgt)
                 {
+                    if (res.Contains(tgt))
+                        return (distResult, null);
+
                     res.Add(tgt);
                     tgt = prev[src.ID][tgt.ID];
                 }
                 res.Add(src);
                 res.Reverse();
 
-                return (shortestDistances[src.ID][tgt.ID], res);
+                return (distResult, res);
             };
         }
 
@@ -161,19 +165,12 @@ namespace ADA_Assignment
                 {
                     foreach (var edge in GetIncomingEdges(node))
                     {
-                        if (distances[edge.From] == infinity)
-                            continue;
-
                         if (edge.From == source)
-                        {
                             newDistances[node] = Math.Min(newDistances[node], edge.Weight);
-                            prev[edge.To] = source;
-                        }
                         else
-                        {
                             newDistances[node] = Math.Min(newDistances[node], distances[edge.From] + edge.Weight);
-                            prev[edge.To] = node;
-                        }
+
+                        prev[edge.To] = edge.From;
                     }
                 }
                 distances = newDistances;
@@ -182,14 +179,21 @@ namespace ADA_Assignment
             for (int i = 0; i < n - 1; i++)
                 PerformCycle();
 
-            Console.WriteLine($"{(distances[source] < 0 ? "Arbitrage" : "No arbitrage")} in {src}");
+            var newDistances = new Dictionary<Node, decimal>(distances);
+            PerformCycle();
+            var hasArbitrage = newDistances.Where(x => x.Value != distances[x.Key]).Count() > 0;
 
-            if (distances[source] >= 0) return null;
+            Console.WriteLine(hasArbitrage ? "Arbitrage found" : "No arbitrage found");
+
+            if (!hasArbitrage) return null;
 
             var path = new List<Node>();
             var curr = source;
             do
             {
+                if (path.Contains(curr)) 
+                    break;
+                
                 path.Add(curr);
                 curr = prev[curr];
             } while (source != curr);

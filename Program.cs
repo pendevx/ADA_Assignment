@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Reflection.Metadata.Ecma335;
+using System.Text;
 using System.Text.Json;
 using System.Xml;
 
@@ -8,20 +9,28 @@ namespace ADA_Assignment
     {
         static readonly string _key = "592ba3456dc1f48f236c1d34";
         static readonly string[] currencies = { "AUD", "RUB", "NZD", "USD", "EUR", "HKD", "GBP" };
+        static readonly HttpClient _httpClient = new HttpClient();
 
         static void Main(string[] args)
         {
-            var client = new HttpClient();
-
-            var tasks = currencies.Select(x => FetchData(client, x)).ToArray();
-
+            var tasks = currencies.Select(x => FetchData(x)).ToArray();
             Task.WaitAll(tasks);
-
             var collectedData = tasks.Select(x => DeserializeJson<Response>(x.Result)).ToArray();
 
             //var graph = BuildGraph(collectedData);
-            var graph = Graph1(); // spectre
+            var graph = Graph5();
 
+            Console.WriteLine("\nWe will first check if there is any arbitrary opportunities: ");
+
+            var bfPath = graph.FindArbitrageOpportunities(graph.Nodes[0].Name);
+            if (bfPath != null)
+            {
+                foreach (var x in bfPath)
+                    Console.Write(x.Name + " ");
+            }
+
+            Console.WriteLine();
+            
             var res = graph.FindBestConversionRate();
 
             Console.WriteLine("Enter the source currency and terminal currency, and we will find the best change exchange path for you");
@@ -30,19 +39,13 @@ namespace ADA_Assignment
             var (rate, path) = res(inp[0], inp[1]);
             Console.WriteLine(rate);
 
-            foreach (var node in path) Console.Write($"{node.Name} ");
-            Console.WriteLine();
-
-            Console.WriteLine();
-            Console.WriteLine("Now we will check if there is any arbitrary opportunities: ");
-            for (int i = 0; i < graph.Nodes.Length; i++)
+            if (path == null)
             {
-                var bfPath = graph.FindArbitrageOpportunities(graph.Nodes[i].Name);
-                if (bfPath == null) continue;
-
-                foreach (var x in bfPath)
-                    Console.Write(x.Name + " ");
-
+                Console.WriteLine("There is an arbitrage cycle along this path! You may keep swapping money between the currencies to become rich");
+            }
+            else
+            {
+                foreach (var node in path) Console.Write($"{node.Name} ");
                 Console.WriteLine();
             }
         }
@@ -61,7 +64,9 @@ namespace ADA_Assignment
         /// <param name="client">The HttpClient to make the request</param>
         /// <param name="baseCurrency">The base currency</param>
         /// <returns>The API response as a string</returns>
-        static async Task<string> FetchData(HttpClient client, string baseCurrency) => await client.GetStringAsync($"https://v6.exchangerate-api.com/v6/{_key}/latest/{baseCurrency}");
+        static async Task<string> FetchData(string baseCurrency) =>
+            //await _httpClient.GetStringAsync($"https://v6.exchangerate-api.com/v6/{_key}/latest/{baseCurrency}");
+            await Task.Run(() => "{}");
 
         /// <summary>
         /// Builds the graph from an array of responses
@@ -219,6 +224,114 @@ namespace ADA_Assignment
             graph.AddEdge(da);
             graph.AddEdge(dc);
             graph.AddEdge(ed);
+
+            return graph;
+        }
+
+        // no negative cycle
+        static Graph Graph4()
+        {
+            var graph = new Graph(6);
+
+            var s = new Node("S");
+            var a = new Node("A");
+            var b = new Node("B");
+            var c = new Node("C");
+            var d = new Node("D");
+            var e = new Node("E");
+
+            var sa = new Edge(s, a, 10, null);
+            var sc = new Edge(s, c, 3, null);
+            var ab = new Edge(a, b, 2, null);
+            var ad = new Edge(a, d, -3, null);
+            var ba = new Edge(b, a, -1, null);
+            var cd = new Edge(c, d, 3, null);
+            var db = new Edge(d, b, 4, null);
+            var de = new Edge(d, e, 1, null);
+            var eb = new Edge(e, b, 4, null);
+
+            graph.AddNode(s);
+            graph.AddNode(a);
+            graph.AddNode(b);
+            graph.AddNode(c);
+            graph.AddNode(d);
+            graph.AddNode(e);
+
+            graph.AddEdge(sa);
+            graph.AddEdge(sc);
+            graph.AddEdge(ab);
+            graph.AddEdge(ad);
+            graph.AddEdge(ba);
+            graph.AddEdge(cd);
+            graph.AddEdge(db);
+            graph.AddEdge(de);
+            graph.AddEdge(eb);
+
+            return graph;
+        }
+
+        // negative cycle A-B-D-C
+        static Graph Graph5()
+        {
+            var graph = new Graph(6);
+
+            var s = new Node("S");
+            var a = new Node("A");
+            var b = new Node("B");
+            var c = new Node("C");
+            var d = new Node("D");
+            var e = new Node("E");
+
+            var sa = new Edge(s, a, 5, null);
+            var ab = new Edge(a, b, 1, null);
+            var bc = new Edge(b, c, 2, null);
+            var bd = new Edge(b, d, -4, null);
+            var be = new Edge(b, e, 5, null);
+            var cs = new Edge(c, s, -2, null);
+            var ca = new Edge(c, a, -2, null);
+            var dc = new Edge(d, c, 4, null);
+            var ed = new Edge(e, d, 5, null);
+
+            graph.AddNode(s);
+            graph.AddNode(a);
+            graph.AddNode(b);
+            graph.AddNode(c);
+            graph.AddNode(d);
+            graph.AddNode(e);
+
+            graph.AddEdge(sa);
+            graph.AddEdge(ab);
+            graph.AddEdge(bc);
+            graph.AddEdge(bd);
+            graph.AddEdge(be);
+            graph.AddEdge(cs);
+            graph.AddEdge(ca);
+            graph.AddEdge(dc);
+            graph.AddEdge(ed);
+
+            return graph;
+        }
+
+        // negative cycle A-B-C
+        static Graph Graph6()
+        {
+            var graph = new Graph(3);
+
+            var a = new Node("A");
+            var b = new Node("B");
+            var c = new Node("C");
+
+            var ab = new Edge(a, b, 1, null);
+            var bc = new Edge(b, c, 2, null);
+            var ca = new Edge(c, a, -4, null);
+
+            graph.AddNode(a);
+            graph.AddNode(b);
+            graph.AddNode(c);
+
+            graph.AddEdge(ab);
+            graph.AddEdge(bc);
+            graph.AddEdge(ca);
 
             return graph;
         }
