@@ -2,27 +2,56 @@
 using System.Text;
 using System.Text.Json;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace ADA_Assignment
 {
     class Program
     {
         static readonly string _key = "592ba3456dc1f48f236c1d34";
-        static readonly string[] currencies = { "AUD", "RUB", "NZD", "USD", "EUR", "HKD", "GBP" };
+        static readonly string[] allowedCurrencies = { "AUD", "RUB", "NZD", "USD", "EUR", "HKD", "GBP", "CNY", "CAD", "CHF", "KRW", "SEK", "INR", "BRL", "CZK", "TRY" };
         static readonly HttpClient _httpClient = new HttpClient();
 
         static void Main(string[] args)
         {
+            // print available currencies
+            Console.WriteLine("Here is a list of the allowed currencies: ");
+            foreach (var currency in allowedCurrencies)
+                Console.Write($"{currency} ");
+
+            // prompt for currencies
+            Console.Write("\n\nPlease choose at least four currencies, typing them in separated by a space: ");
+
+            List<string> currencies = null;
+
+            // get input + input validation
+            while (true)
+            {
+                var input = Console.ReadLine().ToUpper().Trim().Split(" ").GroupBy(x => x).Select(x => x.FirstOrDefault());
+
+                if (input.Count() >= 4 && input.All(x => allowedCurrencies.Contains(x)))
+                {
+                    currencies = input.ToList();
+                    break;
+                }
+
+                Console.WriteLine("Please follow the input criteria and re-input your options.");
+            }
+
+            // fetch data
             var tasks = currencies.Select(x => FetchData(x)).ToArray();
             Task.WaitAll(tasks);
+
+            // deserialize JSON response
             var collectedData = tasks.Select(x => DeserializeJson<Response>(x.Result)).ToArray();
 
-            //var graph = BuildGraph(collectedData);
-            var graph = Graph5();
+            // build graph
+            var graph = BuildGraph(collectedData, currencies.ToArray());
 
             Console.WriteLine("\nWe will first check if there is any arbitrary opportunities: ");
 
-            var bfPath = graph.FindArbitrageOpportunities(graph.Nodes[0].Name);
+            // find arbitrage opportunities and get the path if there is one
+            var bfPath = graph.FindArbitrageOpportunities();
             if (bfPath != null)
             {
                 foreach (var x in bfPath)
@@ -30,24 +59,25 @@ namespace ADA_Assignment
             }
 
             Console.WriteLine();
-            
+
+            // get the best conversion rate between all of the nodes (floyd warshall)
             var res = graph.FindBestConversionRate();
 
+            // prompt for input of 2 currencies
             Console.WriteLine("Enter the source currency and terminal currency, and we will find the best change exchange path for you");
-            Console.WriteLine("Please enter the currencies split up using a space (e.g. 'CurrencyA CurrencyB'):");
+            Console.WriteLine("Please enter the currencies split up using a space (e.g. 'NZD USD'):");
+
+            // get the conversion rate and path for best conversion rate
             var inp = Console.ReadLine().ToUpper().Trim().Split(" ");
             var (rate, path) = res(inp[0], inp[1]);
             Console.WriteLine(rate);
 
+            // if null, dont print path (found negative cycle)
+            // otherwise, print the path
             if (path == null)
-            {
                 Console.WriteLine("There is an arbitrage cycle along this path! You may keep swapping money between the currencies to become rich");
-            }
             else
-            {
                 foreach (var node in path) Console.Write($"{node.Name} ");
-                Console.WriteLine();
-            }
         }
 
         /// <summary>
@@ -65,15 +95,14 @@ namespace ADA_Assignment
         /// <param name="baseCurrency">The base currency</param>
         /// <returns>The API response as a string</returns>
         static async Task<string> FetchData(string baseCurrency) =>
-            //await _httpClient.GetStringAsync($"https://v6.exchangerate-api.com/v6/{_key}/latest/{baseCurrency}");
-            await Task.Run(() => "{}");
+            await _httpClient.GetStringAsync($"https://v6.exchangerate-api.com/v6/{_key}/latest/{baseCurrency}");
 
         /// <summary>
         /// Builds the graph from an array of responses
         /// </summary>
         /// <param name="rates">The rates to convert into the graph</param>
         /// <returns>The graph built from the array of responses</returns>
-        static Graph BuildGraph(Response[] rates)
+        static Graph BuildGraph(Response[] rates, string[] currencies)
         {
             var ExtractData = (Response r) => r.conversion_rates.Where(x => currencies.Contains(x.Key));
 

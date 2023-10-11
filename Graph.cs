@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Immutable;
 using System.Text;
+using System.Xml.Linq;
 
 namespace ADA_Assignment
 {
@@ -73,8 +74,8 @@ namespace ADA_Assignment
         /// <returns>A function which takes in a source and a target string, and returns the best conversion rate from the source to the target</returns>
         public Func<string, string, (decimal, List<Node>?)> FindBestConversionRate() // Too generalized use case, needs to specialize for assignment
         {
-            var shortestDistances = (decimal[][])Matrix.Clone();
-            var prev = Nodes.Select(x => new Node[Nodes.Length].Select(y => x).ToArray()).ToArray();
+            var shortestDistances = (decimal[][])Matrix.Clone(); // 2d decimal array of the shortest distances
+            var predecessors = Nodes.Select(x => new Node[Nodes.Length].Select(y => x).ToArray()).ToArray(); // the previous nodes as a Node[][] 2d array
 
             for (int k = 0; k < Nodes.Length; k++)
             {
@@ -90,7 +91,7 @@ namespace ADA_Assignment
                             shortestDistances[i][j] = newval;
 
                             // set the previous of [i][j] to be the previous of [k][j]
-                            prev[i][j] = prev[k][j];
+                            predecessors[i][j] = predecessors[k][j];
                         }
                     }
                 }
@@ -100,19 +101,35 @@ namespace ADA_Assignment
 
             return (source, target) =>
             {
+                // get source and target node
                 var src = GetNode(source);
                 var tgt = GetNode(target);
+
+                if (src == null)
+                    throw new ArgumentNullException("source node was not found");
+                if (target == null)
+                    throw new ArgumentNullException("target node was not found");
+
+                // the result (path)
                 var res = new List<Node>();
+                // the shortest distance from source to target
                 var distResult = shortestDistances[src.ID][tgt.ID];
 
                 while (src != tgt)
                 {
+                    // if the result contains the target then we that means are trapped in a negative cycle on the path from src->target
+                    // so we can break out of the loop and return null for the path to indicate that there is a negative cycle along the path from src->target
                     if (res.Contains(tgt))
                         return (distResult, null);
 
+                    // add the target node to the result
+                    // update the target to be its previous node as tracked in the predecessors 2d array above
                     res.Add(tgt);
-                    tgt = prev[src.ID][tgt.ID];
+                    tgt = predecessors[src.ID][tgt.ID];
                 }
+
+                // add the source node to complete the cycle
+                // since we were tracking predecessors rather than children, the path was built in reverse, so we reverse it to correct the path
                 res.Add(src);
                 res.Reverse();
 
@@ -120,6 +137,10 @@ namespace ADA_Assignment
             };
         }
 
+        /// <summary>
+        /// Prints the conversion rates
+        /// </summary>
+        /// <param name="conversionRates">The conversion rates to be printed</param>
         void PrintConversionRates(decimal[][] conversionRates)
         {
             Console.Write("".PadRight(5));
@@ -143,61 +164,77 @@ namespace ADA_Assignment
         /// Perform Bellman Ford algorithm on the graph
         /// </summary>
         /// <param name="src">The source node's name</param>
-        /// <returns>Distances from the source node to all other nodes</returns>
-        /// <exception cref="ArgumentNullException">The source node is null</exception>
-        public IList<Node> FindArbitrageOpportunities(string src)
+        /// <returns>A detected negative cycle, or null if none was found</returns>
+        public IList<Node>? FindArbitrageOpportunities()
         {
-            var source = GetNode(src);
-            if (source == null) throw new ArgumentNullException("source cannot be null");
+            // get a random source node
+            var source = Nodes[new Random().Next(Nodes.Length)];
 
             var n = Nodes.Length;
-            var distances = new Dictionary<Node, decimal>();
+            var distances = new Dictionary<Node, decimal>(); // distances of each node
+            var predecessors = new Dictionary<Node, Node>(); // predecessors of each node
 
-            var prev = new Dictionary<Node, Node>();
-
+            // initialize the distances to [0,inf,inf,inf,...]
             foreach (var node in Nodes) distances[node] = infinity;
             distances[source] = 0;
 
             void PerformCycle()
             {
-                var newDistances = new Dictionary<Node, decimal>(distances);
+                var newDistances = new Dictionary<Node, decimal>(distances); // updated distance from current cycle
                 foreach (var node in Nodes)
                 {
                     foreach (var edge in GetIncomingEdges(node))
                     {
-                        if (edge.From == source)
-                            newDistances[node] = Math.Min(newDistances[node], edge.Weight);
-                        else
-                            newDistances[node] = Math.Min(newDistances[node], distances[edge.From] + edge.Weight);
+                        var calculatedDistance = distances[edge.From] + edge.Weight;
 
-                        prev[edge.To] = edge.From;
+                        if (calculatedDistance < distances[node])
+                        {
+                            // if calculatedDistance is lower value then update it in the distances and set the predecessor 
+                            newDistances[node] = calculatedDistance;
+                            predecessors[edge.To] = edge.From;
+                        }
                     }
                 }
+                // update the distances to the new distances
                 distances = newDistances;
             }
 
+            // perform the cycle (relax edges) n-1 times
             for (int i = 0; i < n - 1; i++)
                 PerformCycle();
 
+            // new distances to check for change
             var newDistances = new Dictionary<Node, decimal>(distances);
-            PerformCycle();
-            var hasArbitrage = newDistances.Where(x => x.Value != distances[x.Key]).Count() > 0;
+
+            // run the cycle another n times to allow the negative cycle to spread across the entire graph
+            // so it is detectable from any node
+            for (int i = 0; i < n; i++)
+                PerformCycle();
+
+            // check for arbitrage opportunities
+            // bellman ford can check for negative cycles by seeing if after at least one relaxation of edges, if there is a change in the distances
+            var hasArbitrage = newDistances.Any(x => x.Value != distances[x.Key]);
 
             Console.WriteLine(hasArbitrage ? "Arbitrage found" : "No arbitrage found");
-
             if (!hasArbitrage) return null;
 
-            var path = new List<Node>();
-            var curr = source;
-            do
+            var path = new List<Node>(); // the exact path of the negative cycle
+            var curr = Nodes[0];
+            
+            while (true)
             {
-                if (path.Contains(curr)) 
+                if (path.Contains(curr)) // exit if we have reached a node which we have already found (we have a negative cycle)
                     break;
-                
-                path.Add(curr);
-                curr = prev[curr];
-            } while (source != curr);
 
+                // add the current node to the path and backtrack current node to predecessor
+                path.Add(curr);
+                curr = predecessors[curr];
+            }
+
+            // add the first node to form full cycle
+            // path was created in reverse (tracking predecessors rather than tracking children), so therefore reverse the path to correct the path
+            path.Add(path[0]);
+            path.Reverse();
             return path;
         }
 
@@ -210,6 +247,42 @@ namespace ADA_Assignment
         {
             var res = Nodes.Where(x => x.Name == name).FirstOrDefault();
             return res;
+        }
+
+        /// <summary>
+        /// Gets an edge
+        /// </summary>
+        /// <param name="from">The source node's name</param>
+        /// <param name="to">The terminal node's name</param>
+        /// <returns>The edge which goes from the source node <paramref name="from"/> to the terminal node <paramref name="to"/></returns>
+        public Edge GetEdge(string from, string to)
+        {
+            var fromNode = GetNode(from);
+            var toNode = GetNode(to);
+
+            return GetEdge(fromNode, toNode);
+        }
+
+        /// <summary>
+        /// Gets an edge
+        /// </summary>
+        /// <param name="from">The source node</param>
+        /// <param name="to">The terminal node</param>
+        /// <returns>The edge which goes from the source node <paramref name="from"/> to the terminal node <paramref name="to"/></returns>
+        public Edge GetEdge(Node from, Node to)
+        {
+            if (from == null)
+                throw new ArgumentNullException("value of 'from' doesn't exist");
+            else if (to == null)
+                throw new ArgumentNullException("value of 'to' doesn't exist");
+
+            var edges = GetIncomingEdges(to);
+            var edge = edges.Where(x => x.From == from).FirstOrDefault();
+
+            if (edge == null)
+                throw new NullReferenceException("no edge exist");
+
+            return edge;
         }
     }
 }
