@@ -72,7 +72,7 @@ namespace ADA_Assignment
         /// Perform Floyd-Warshall algorithm on the graph
         /// </summary>
         /// <returns>A function which takes in a source and a target string, and returns the best conversion rate from the source to the target</returns>
-        public Func<string, string, (decimal, List<Node>?)> FindBestConversionRate() // Too generalized use case, needs to specialize for assignment
+        public Func<string, string, (double, List<Node>?)> FindBestConversionRate() // Too generalized use case, needs to specialize for assignment
         {
             var shortestDistances = (decimal[][])Matrix.Clone(); // 2d decimal array of the shortest distances
             var predecessors = Nodes.Select(x => new Node[Nodes.Length].Select(y => x).ToArray()).ToArray(); // the previous nodes as a Node[][] 2d array
@@ -113,7 +113,7 @@ namespace ADA_Assignment
                 // the result (path)
                 var res = new List<Node>();
                 // the shortest distance from source to target
-                var distResult = shortestDistances[src.ID][tgt.ID];
+                var distResult = (double)shortestDistances[src.ID][tgt.ID];
 
                 while (src != tgt)
                 {
@@ -133,27 +133,31 @@ namespace ADA_Assignment
                 res.Add(src);
                 res.Reverse();
 
-                return (distResult, res);
+                var rate = Math.Pow(10, -distResult);
+                return (rate, res);
             };
         }
 
         /// <summary>
         /// Prints the conversion rates
         /// </summary>
-        /// <param name="conversionRates">The conversion rates to be printed</param>
-        void PrintConversionRates(decimal[][] conversionRates)
+        /// <param name="weights">The conversion rates to be printed</param>
+        void PrintConversionRates(decimal[][] weights)
         {
             Console.Write("".PadRight(5));
             foreach (var node in Nodes)
                 Console.Write(node.Name.PadLeft(10));
             Console.WriteLine();
 
-            for (int i = 0; i < conversionRates.Length; i++)
+            for (int i = 0; i < weights.Length; i++)
             {
                 Console.Write(Nodes[i].Name.PadRight(7));
 
-                for (int j = 0; j < conversionRates[i].Length; j++)
-                    Console.Write($"{conversionRates[i][j],9:0.0000} ");
+                for (int j = 0; j < weights[i].Length; j++)
+                {
+                    var rate = Math.Pow(10, (double)-weights[i][j]);
+                    Console.Write($"{rate,9:0.0000} ");
+                }
 
                 Console.WriteLine();
             }

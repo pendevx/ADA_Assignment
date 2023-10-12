@@ -8,12 +8,13 @@ namespace ADA_Assignment
 {
     class Program
     {
-        static readonly string _key = "592ba3456dc1f48f236c1d34";
+        static string _key;
         static readonly string[] allowedCurrencies = { "AUD", "RUB", "NZD", "USD", "EUR", "HKD", "GBP", "CNY", "CAD", "CHF", "KRW", "SEK", "INR", "BRL", "CZK", "TRY" };
         static readonly HttpClient _httpClient = new HttpClient();
 
         static void Main(string[] args)
         {
+            _key = File.ReadAllText("./key.txt").Trim();
             // print available currencies
             Console.WriteLine("Here is a list of the allowed currencies: ");
             foreach (var currency in allowedCurrencies)
@@ -78,6 +79,8 @@ namespace ADA_Assignment
                 Console.WriteLine("There is an arbitrage cycle along this path! You may keep swapping money between the currencies to become rich");
             else
                 foreach (var node in path) Console.Write($"{node.Name} ");
+
+            Console.ReadLine();
         }
 
         /// <summary>
