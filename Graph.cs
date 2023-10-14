@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Immutable;
-using System.Text;
-using System.Xml.Linq;
-
-namespace ADA_Assignment
+﻿namespace ADA_Assignment
 {
     class Graph
     {
@@ -14,10 +9,12 @@ namespace ADA_Assignment
 
         public Graph(int size)
         {
+            // Initialize fields
             Matrix = new decimal[size][];
             Nodes = new Node[size];
             Matrix = Matrix.Select(x => new decimal[size]).ToArray();
 
+            // Set every matrix item to be 0 except for diagonal to be infinity
             for (int i = 0; i < size; i++)
             {
                 for (int j = 0; j < size; j++)
@@ -28,9 +25,10 @@ namespace ADA_Assignment
         }
 
         /// <summary>
-        /// Add a node to the graph
+        /// Adds a node to the graph
         /// </summary>
         /// <param name="n">The node to add</param>
+        /// <exception cref="ApplicationException">The graph's node amount has reached its capacity</exception>
         public void AddNode(Node n)
         {
             if (_i == Nodes.Length) throw new ApplicationException("Cannot add more nodes than the originally specified matrix size.");
@@ -44,7 +42,7 @@ namespace ADA_Assignment
         /// <param name="e">The edge to add</param>
         public void AddEdge(Edge e)
         {
-            Matrix[e.From.ID][e.To.ID] = e.Weight;
+            Matrix[e.From.ID][e.To.ID] = e.Weight; // add edge to the matrix
         }
 
         /// <summary>
@@ -53,26 +51,32 @@ namespace ADA_Assignment
         /// </summary>
         /// <param name="n">The node the get incoming edges for</param>
         /// <returns>The edges which enter the node</returns>
-        List<Edge> GetIncomingEdges(Node n)
+        IList<Edge> GetIncomingEdges(Node n)
         {
+            // the result to return
             var res = new List<Edge>();
             for (int i = 0; i < Nodes.Length; i++)
             {
                 var weight = Matrix[i][n.ID];
+
+                // do not add edges with weight of infinity, or edges which create a direct loop on itself
                 if (weight == infinity) continue;
                 if (Nodes[i] == n) continue;
 
+                // if checks pass, add the edge to the list
                 var e = new Edge(Nodes[i], n, weight, null);
                 res.Add(e);
             }
+            // return the edges
             return res;
         }
-
+        
         /// <summary>
-        /// Perform Floyd-Warshall algorithm on the graph
+        /// Calculates the best conversion rate between every node
         /// </summary>
-        /// <returns>A function which takes in a source and a target string, and returns the best conversion rate from the source to the target</returns>
-        public Func<string, string, (double, List<Node>?)> FindBestConversionRate() // Too generalized use case, needs to specialize for assignment
+        /// <returns>A function which will return the best conversion rate and the exact path from the source node to the terminal node</returns>
+        /// <exception cref="ArgumentNullException">The source or the target nodes do not exist</exception>        
+        public Func<string, string, (double, List<Node>?)> FindBestConversionRate()
         {
             var shortestDistances = (decimal[][])Matrix.Clone(); // 2d decimal array of the shortest distances
             var predecessors = Nodes.Select(x => new Node[Nodes.Length].Select(y => x).ToArray()).ToArray(); // the previous nodes as a Node[][] 2d array
